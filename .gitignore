@@ -1,0 +1,21 @@
+# Node dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Environment files
+.env
+.env.local
+
+# Docker
+.docker/
+
+# OS files
+.DS_Store
+
+# Terraform (in case any tf files end up here)
+.terraform/
+*.tfstate
+*.tfplan

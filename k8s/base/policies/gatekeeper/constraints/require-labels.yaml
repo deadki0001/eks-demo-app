@@ -1,0 +1,22 @@
+# ##############################################################################
+# CONSTRAINT: RequireLabels
+#
+# Activates RequireLabels requiring app, version, and environment
+# on all pods in the lsd-payments namespace.
+# ##############################################################################
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: RequireLabels
+metadata:
+  name: require-pod-labels
+spec:
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Pod"]
+    namespaces:
+      - lsd-payments
+  parameters:
+    labels:
+      - app
+      - version
+      - environment

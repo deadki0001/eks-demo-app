@@ -1,0 +1,49 @@
+# ##############################################################################
+# CONSTRAINTTEMPLATE: BlockLatestTag
+#
+# Defines the policy logic in Rego.
+# This template can be instantiated multiple times with different parameters.
+#
+# What it does:
+# Loops through every container in the pod spec (including init containers).
+# If any container image does not have a tag, or has the tag "latest",
+# the admission request is denied with a clear error message.
+#
+# Why this matters:
+# Using :latest means you cannot tell what code is actually running.
+# It breaks reproducibility, auditability, and rollback capability.
+# Every image in production must have a specific immutable tag.
+# ##############################################################################
+apiVersion: templates.gatekeeper.sh/v1
+kind: ConstraintTemplate
+metadata:
+  name: blocklatesttag
+  annotations:
+    description: "Blocks container images that use the :latest tag"
+spec:
+  crd:
+    spec:
+      names:
+        kind: BlockLatestTag
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package blocklatestag
+
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          endswith(container.image, ":latest")
+          msg := sprintf("Container '%v' uses :latest tag. Specify an explicit image tag.", [container.name])
+        }
+
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          not contains(container.image, ":")
+          msg := sprintf("Container '%v' has no image tag. Specify an explicit image tag.", [container.name])
+        }
+
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.initContainers[_]
+          endswith(container.image, ":latest")
+          msg := sprintf("Init container '%v' uses :latest tag. Specify an explicit image tag.", [container.name])
+        }

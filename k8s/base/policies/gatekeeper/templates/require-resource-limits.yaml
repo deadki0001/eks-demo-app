@@ -1,0 +1,34 @@
+# ##############################################################################
+# CONSTRAINTTEMPLATE: RequireResourceLimits
+#
+# Every container must declare CPU and memory limits.
+# Without limits a single runaway container can consume all node resources
+# and starve every other pod on the node.
+# ##############################################################################
+apiVersion: templates.gatekeeper.sh/v1
+kind: ConstraintTemplate
+metadata:
+  name: requireresourcelimits
+  annotations:
+    description: "Requires CPU and memory limits on all containers"
+spec:
+  crd:
+    spec:
+      names:
+        kind: RequireResourceLimits
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package requireresourcelimits
+
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          not container.resources.limits.memory
+          msg := sprintf("Container '%v' is missing memory limit.", [container.name])
+        }
+
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          not container.resources.limits.cpu
+          msg := sprintf("Container '%v' is missing CPU limit.", [container.name])
+        }

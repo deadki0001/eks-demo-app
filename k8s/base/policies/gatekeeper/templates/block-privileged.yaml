@@ -1,0 +1,30 @@
+# ##############################################################################
+# CONSTRAINTTEMPLATE: BlockPrivileged
+#
+# Blocks containers from running in privileged mode.
+# A privileged container has nearly the same access to the host as
+# a process running directly on the node. It can read host files,
+# modify kernel parameters, and escape the container sandbox entirely.
+# There is no legitimate reason for application containers to be privileged.
+# ##############################################################################
+apiVersion: templates.gatekeeper.sh/v1
+kind: ConstraintTemplate
+metadata:
+  name: blockprivileged
+  annotations:
+    description: "Blocks privileged containers"
+spec:
+  crd:
+    spec:
+      names:
+        kind: BlockPrivileged
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package blockprivileged
+
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          container.securityContext.privileged == true
+          msg := sprintf("Container '%v' is running as privileged. This is not allowed.", [container.name])
+        }

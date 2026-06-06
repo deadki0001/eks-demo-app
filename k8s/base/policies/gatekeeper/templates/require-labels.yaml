@@ -1,0 +1,41 @@
+# ##############################################################################
+# CONSTRAINTTEMPLATE: RequireLabels
+#
+# Every pod must have the labels specified in the constraint.
+# This enforces governance - without consistent labels your monitoring,
+# alerting, and cost allocation tools cannot work correctly.
+#
+# Required labels for this project:
+#   app         - identifies the application (lsd-frontend, lsd-backend)
+#   version     - the deployed version (matches the image tag)
+#   environment - the environment (dev, prod)
+# ##############################################################################
+apiVersion: templates.gatekeeper.sh/v1
+kind: ConstraintTemplate
+metadata:
+  name: requirelabels
+  annotations:
+    description: "Requires specified labels to be present on pods"
+spec:
+  crd:
+    spec:
+      names:
+        kind: RequireLabels
+      validation:
+        openAPIV3Schema:
+          type: object
+          properties:
+            labels:
+              type: array
+              items:
+                type: string
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package requirelabels
+
+        violation[{"msg": msg}] {
+          required := input.parameters.labels[_]
+          not input.review.object.metadata.labels[required]
+          msg := sprintf("Pod is missing required label: '%v'", [required])
+        }

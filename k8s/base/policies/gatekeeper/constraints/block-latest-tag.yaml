@@ -1,0 +1,20 @@
+# ##############################################################################
+# CONSTRAINT: BlockLatestTag
+#
+# Activates the BlockLatestTag template across all namespaces
+# except the system namespaces where we do not control image tags.
+# ##############################################################################
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: BlockLatestTag
+metadata:
+  name: block-latest-tag
+spec:
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Pod"]
+    excludedNamespaces:
+      - kube-system
+      - gatekeeper-system
+      - argocd
+      - external-secrets

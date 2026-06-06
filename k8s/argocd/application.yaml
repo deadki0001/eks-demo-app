@@ -1,0 +1,40 @@
+# ##############################################################################
+# ARGOCD APPLICATION - lsd-payments
+#
+# This manifest tells ArgoCD what to deploy and where.
+# Once applied ArgoCD continuously watches the Git repo and ensures
+# the cluster state matches what is in Git.
+#
+# If someone manually deletes a deployment in the cluster ArgoCD detects
+# the drift and recreates it within 3 minutes. This is self-healing.
+#
+# If you push new manifests to Git ArgoCD detects the change and applies
+# them automatically. This is continuous delivery without a pipeline
+# needing kubectl access to the cluster.
+#
+# syncPolicy.automated means ArgoCD syncs without manual approval.
+# prune = true means resources removed from Git get removed from the cluster.
+# selfHeal = true means manual cluster changes get reverted to match Git.
+# ##############################################################################
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: lsd-payments
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/deadki0001/eks-demo-app.git
+    targetRevision: main
+    path: k8s/overlays/dev
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: lsd-payments
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

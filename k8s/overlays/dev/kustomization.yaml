@@ -6,7 +6,11 @@ namespace: lsd-payments
 resources:
   - ../../base
 
-namePrefix: ""
-
 commonLabels:
   environment: dev
+
+images:
+  - name: 988176743547.dkr.ecr.us-east-2.amazonaws.com/lsd-backend
+    newTag: sha-65a69c4
+  - name: 988176743547.dkr.ecr.us-east-2.amazonaws.com/lsd-frontend
+    newTag: sha-65a69c4

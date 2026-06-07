@@ -11,6 +11,6 @@ commonLabels:
 
 images:
   - name: 988176743547.dkr.ecr.us-east-2.amazonaws.com/lsd-backend
-    newTag: sha-0dbd4f4
+    newTag: sha-b4ff644
   - name: 988176743547.dkr.ecr.us-east-2.amazonaws.com/lsd-frontend
-    newTag: sha-0dbd4f4
+    newTag: sha-b4ff644

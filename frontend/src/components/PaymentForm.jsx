@@ -4,7 +4,7 @@ import axios from 'axios'
 function PaymentForm({ apiUrl, onPaymentCreated }) {
   const [form, setForm] = useState({
     amount: '',
-    currency: 'USD',
+    currency: 'ZAR',
     sender: '',
     recipient: '',
     description: ''
@@ -24,10 +24,10 @@ function PaymentForm({ apiUrl, onPaymentCreated }) {
     try {
       const response = await axios.post(`${apiUrl}/payments`, form)
       onPaymentCreated(response.data)
-      setForm({ amount: '', currency: 'USD', sender: '', recipient: '', description: '' })
-      setMessage({ type: 'success', text: 'Payment created successfully' })
+      setForm({ amount: '', currency: 'ZAR', sender: '', recipient: '', description: '' })
+      setMessage({ type: 'success', text: '⚡ Transmission successful — signal delivered at light speed' })
     } catch (err) {
-      setMessage({ type: 'error', text: err.response?.data?.error || 'Payment failed' })
+      setMessage({ type: 'error', text: `✕ Transmission failed — ${err.response?.data?.error || 'signal lost'}` })
     } finally {
       setSubmitting(false)
     }
@@ -38,49 +38,74 @@ function PaymentForm({ apiUrl, onPaymentCreated }) {
       {message && (
         <div className={`message ${message.type}`}>{message.text}</div>
       )}
-      <div className="form-row">
+      <div className="input-group">
+        <label className="input-label">Signal Strength (Amount)</label>
+        <div className="input-row">
+          <input
+            className="form-input amount-input"
+            type="number"
+            name="amount"
+            placeholder="0.00"
+            value={form.amount}
+            onChange={handleChange}
+            required
+            min="0.01"
+            step="0.01"
+          />
+          <select
+            className="currency-select"
+            name="currency"
+            value={form.currency}
+            onChange={handleChange}
+          >
+            <option value="ZAR">ZAR</option>
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+            <option value="GBP">GBP</option>
+          </select>
+        </div>
+      </div>
+      <div className="input-group">
+        <label className="input-label">Origin Node (Sender)</label>
         <input
-          type="number"
-          name="amount"
-          placeholder="Amount"
-          value={form.amount}
+          className="form-input"
+          type="text"
+          name="sender"
+          placeholder="Your name"
+          value={form.sender}
           onChange={handleChange}
           required
-          min="0.01"
-          step="0.01"
         />
-        <select name="currency" value={form.currency} onChange={handleChange}>
-          <option value="USD">USD</option>
-          <option value="EUR">EUR</option>
-          <option value="GBP">GBP</option>
-          <option value="ZAR">ZAR</option>
-        </select>
       </div>
-      <input
-        type="text"
-        name="sender"
-        placeholder="Sender"
-        value={form.sender}
-        onChange={handleChange}
-        required
-      />
-      <input
-        type="text"
-        name="recipient"
-        placeholder="Recipient"
-        value={form.recipient}
-        onChange={handleChange}
-        required
-      />
-      <input
-        type="text"
-        name="description"
-        placeholder="Description (optional)"
-        value={form.description}
-        onChange={handleChange}
-      />
-      <button type="submit" disabled={submitting}>
-        {submitting ? 'Sending...' : 'Send Payment'}
+      <div className="input-group">
+        <label className="input-label">Destination Node (Recipient)</label>
+        <input
+          className="form-input"
+          type="text"
+          name="recipient"
+          placeholder="Recipient name"
+          value={form.recipient}
+          onChange={handleChange}
+          required
+        />
+      </div>
+      <div className="input-group">
+        <label className="input-label">Transmission Note</label>
+        <input
+          className="form-input"
+          type="text"
+          name="description"
+          placeholder="What is this for? (optional)"
+          value={form.description}
+          onChange={handleChange}
+        />
+      </div>
+      <button type="submit" className="launch-button" disabled={submitting}>
+        {submitting ? (
+          <><span>Transmitting</span><span>···</span></>
+        ) : (
+          <><span>⚡</span><span>Launch Transmission</span></>
+        )}
       </button>
     </form>
   )

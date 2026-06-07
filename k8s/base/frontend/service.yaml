@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: lsd-frontend
+  namespace: lsd-payments
+  labels:
+    app: lsd-frontend
+spec:
+  selector:
+    app: lsd-frontend
+  ports:
+    - port: 8080
+      targetPort: 8080
+  type: ClusterIP

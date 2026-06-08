@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { Home, BarChart2, Send, Users, Zap, Info } from 'lucide-react'
+import { Home, BarChart2, Send, Users, Zap, Info, CreditCard } from 'lucide-react'
 import InfoBar from './InfoBar'
 
 export default function NavBar({ onSend, desktop }) {
@@ -22,6 +22,7 @@ export default function NavBar({ onSend, desktop }) {
               <NavLink to="/analytics" className={({isActive}) => `dnl ${isActive?'dnl-active':''}`}>Analytics</NavLink>
               <NavLink to="/beneficiaries" className={({isActive}) => `dnl ${isActive?'dnl-active':''}`}>Beneficiaries</NavLink>
               <NavLink to="/instant-money" className={({isActive}) => `dnl ${isActive?'dnl-active':''}`}>Instant Money</NavLink>
+              <NavLink to="/loans" className={({isActive}) => `dnl ${isActive?'dnl-active':''}`}>Loans</NavLink>
             </nav>
           )}
           <button className="about-btn" onClick={() => navigate('/about')}>

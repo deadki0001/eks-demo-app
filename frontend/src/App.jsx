@@ -5,6 +5,7 @@ import Home from './screens/Home'
 import Analytics from './screens/Analytics'
 import Beneficiaries from './screens/Beneficiaries'
 import InstantMoney from './screens/InstantMoney'
+import Loans from './screens/Loans'
 import About from './screens/About'
 import SendSheet from './components/SendSheet'
 import NavBar from './components/NavBar'
@@ -42,6 +43,7 @@ export default function App() {
         <Beneficiaries apiUrl={API_URL} onSend={() => setSheet(true)} />
       } />
       <Route path="/instant-money" element={<InstantMoney apiUrl={API_URL} />} />
+      <Route path="/loans" element={<Loans />} />
       <Route path="/about" element={<About />} />
     </Routes>
   )

@@ -1054,3 +1054,94 @@ button.bn-send {
 .footer-brand { font-size: 15px; font-weight: 700; }
 .footer-tag   { font-size: 10px; color: #9090b0; }
 .footer-copy  { font-size: 11px; color: #44445a; line-height: 1.8; }
+
+/* ── RECEIVE SHEET ── */
+.receive-qr-wrap {
+  display: flex; justify-content: center;
+  margin-bottom: 16px;
+}
+
+.receive-qr {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 24px;
+  display: flex; flex-direction: column;
+  align-items: center; gap: 10px;
+  width: 160px;
+}
+
+.receive-qr-label {
+  font-size: 11px; font-weight: 600;
+  color: var(--t3); text-transform: uppercase; letter-spacing: 0.8px;
+}
+
+.receive-details {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.receive-row {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.receive-row:last-child { border-bottom: none; }
+
+.receive-row-label {
+  font-size: 11px; color: var(--t3); font-weight: 500;
+  min-width: 100px;
+}
+
+.receive-row-right {
+  display: flex; align-items: center; gap: 8px;
+}
+
+.receive-row-value {
+  font-size: 12px; font-weight: 600; color: var(--t1);
+}
+
+/* ── MORE SHEET ── */
+.more-menu {
+  display: flex; flex-direction: column; gap: 2px;
+}
+
+.more-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px; border-radius: 13px;
+  background: transparent;
+  transition: background 0.12s;
+  width: 100%; text-align: left;
+}
+
+.more-item:hover { background: var(--bg3); }
+
+.more-item-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: var(--bg3); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--t2); flex-shrink: 0;
+  transition: background 0.12s;
+}
+
+.more-item:hover .more-item-icon { background: var(--bg4); color: var(--t1); }
+
+.more-item-body { flex: 1; min-width: 0; }
+.more-item-label { font-size: 13px; font-weight: 600; color: var(--t1); }
+.more-item-sub   { font-size: 10px; color: var(--t3); margin-top: 2px; }
+.more-item-arrow { font-size: 18px; color: var(--t3); }
+
+.more-divider {
+  height: 1px; background: var(--border);
+  margin: 8px 0;
+}
+
+.more-logout-icon {
+  background: rgba(255,77,106,0.1);
+  border-color: rgba(255,77,106,0.2);
+  color: var(--danger);
+}

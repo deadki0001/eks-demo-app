@@ -6,7 +6,7 @@ async function initDb() {
   await query(`
     CREATE TABLE IF NOT EXISTS vouchers (
       id          SERIAL PRIMARY KEY,
-      code        VARCHAR(12) NOT NULL UNIQUE,
+      code        VARCHAR(16) NOT NULL UNIQUE,
       pin         VARCHAR(6)  NOT NULL,
       amount      NUMERIC(12,2) NOT NULL,
       currency    VARCHAR(3) NOT NULL DEFAULT 'ZAR',
@@ -25,10 +25,9 @@ function generateCode() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
   let code = ''
   for (let i = 0; i < 12; i++) {
-    if (i > 0 && i % 4 === 0) code += '-'
     code += chars[Math.floor(Math.random() * chars.length)]
   }
-  return code
+  return code.slice(0, 4) + '-' + code.slice(4, 8) + '-' + code.slice(8, 12)
 }
 
 function generatePin() {

@@ -2,94 +2,98 @@ import { useState, useEffect } from 'react'
 import axios from 'axios'
 
 const WMO_CODES = {
-  0: { label: 'Clear sky', icon: '☀️' },
-  1: { label: 'Mainly clear', icon: '🌤️' },
-  2: { label: 'Partly cloudy', icon: '⛅' },
-  3: { label: 'Overcast', icon: '☁️' },
-  45: { label: 'Foggy', icon: '🌫️' },
-  48: { label: 'Icy fog', icon: '🌫️' },
+  0:  { label: 'Clear sky',     icon: '☀️' },
+  1:  { label: 'Mainly clear',  icon: '🌤️' },
+  2:  { label: 'Partly cloudy', icon: '⛅' },
+  3:  { label: 'Overcast',      icon: '☁️' },
+  45: { label: 'Foggy',         icon: '🌫️' },
+  48: { label: 'Icy fog',       icon: '🌫️' },
   51: { label: 'Light drizzle', icon: '🌦️' },
-  53: { label: 'Drizzle', icon: '🌦️' },
+  53: { label: 'Drizzle',       icon: '🌦️' },
   55: { label: 'Heavy drizzle', icon: '🌧️' },
-  61: { label: 'Light rain', icon: '🌧️' },
-  63: { label: 'Rain', icon: '🌧️' },
-  65: { label: 'Heavy rain', icon: '🌧️' },
-  71: { label: 'Light snow', icon: '🌨️' },
-  73: { label: 'Snow', icon: '❄️' },
-  75: { label: 'Heavy snow', icon: '❄️' },
-  80: { label: 'Showers', icon: '🌦️' },
-  81: { label: 'Showers', icon: '🌧️' },
-  82: { label: 'Heavy showers', icon: '🌧️' },
-  95: { label: 'Thunderstorm', icon: '⛈️' },
-  99: { label: 'Thunderstorm', icon: '⛈️' },
+  61: { label: 'Light rain',    icon: '🌧️' },
+  63: { label: 'Rain',          icon: '🌧️' },
+  65: { label: 'Heavy rain',    icon: '🌧️' },
+  80: { label: 'Showers',       icon: '🌦️' },
+  95: { label: 'Thunderstorm',  icon: '⛈️' },
 }
 
-const PAIRS = [
-  { from: 'USD', label: 'USD/ZAR' },
-  { from: 'EUR', label: 'EUR/ZAR' },
-  { from: 'GBP', label: 'GBP/ZAR' },
-]
-
 export default function InfoBar() {
-  const [weather, setWeather] = useState(null)
-  const [rates, setRates] = useState(null)
-  const [tick, setTick] = useState(0)
+  const [weather, setWeather]   = useState(null)
+  const [rates,   setRates]     = useState(null)
+  const [tick,    setTick]      = useState(0)
+  const [time,    setTime]      = useState('')
 
+  // Clock
   useEffect(() => {
-    // Weather - Johannesburg
+    const update = () => setTime(
+      new Date().toLocaleTimeString('en-ZA', {
+        hour: '2-digit', minute: '2-digit',
+        timeZone: 'Africa/Johannesburg'
+      })
+    )
+    update()
+    const id = setInterval(update, 1000)
+    return () => clearInterval(id)
+  }, [])
+
+  // Weather - Johannesburg (-26.2041, 28.0473)
+  useEffect(() => {
     axios.get('https://api.open-meteo.com/v1/forecast', {
       params: {
         latitude: -26.2041,
         longitude: 28.0473,
         current_weather: true,
-        hourly: 'relativehumidity_2m',
-        forecast_days: 1,
-        timezone: 'Africa/Johannesburg'
+        timezone: 'Africa/Johannesburg',
+        forecast_days: 1
       }
     }).then(res => {
-      const cw = res.data.current_weather
-      const code = WMO_CODES[cw.weathercode] || { label: 'Unknown', icon: '🌡️' }
+      const cw  = res.data.current_weather
+      const meta = WMO_CODES[cw.weathercode] || { label: 'Unknown', icon: '🌡️' }
       setWeather({
         temp: Math.round(cw.temperature),
         wind: Math.round(cw.windspeed),
-        icon: code.icon,
-        label: code.label,
-        isDay: cw.is_day
+        icon: meta.icon,
+        label: meta.label
       })
-    }).catch(() => setWeather({ temp: '--', icon: '🌡️', label: 'Unavailable', wind: '--' }))
+    }).catch(() => {
+      setWeather({ temp: '--', wind: '--', icon: '🌡️', label: 'Unavailable' })
+    })
+  }, [])
 
-    // Exchange rates - ZAR base
-    axios.get('https://api.frankfurter.dev/v2/rates', {
-      params: { base: 'ZAR', symbols: 'USD,EUR,GBP' }
+  // FX Rates - USD base, get ZAR rate directly
+  useEffect(() => {
+    axios.get('https://api.frankfurter.dev/v2/latest', {
+      params: { base: 'USD', currencies: 'ZAR,EUR,GBP' }
     }).then(res => {
       const r = res.data.rates
-      // Invert to get how many ZAR per foreign currency
       setRates({
-        'USD/ZAR': (1 / r.USD).toFixed(2),
-        'EUR/ZAR': (1 / r.EUR).toFixed(2),
-        'GBP/ZAR': (1 / r.GBP).toFixed(2),
+        pairs: [
+          { label: 'USD/ZAR', value: r.ZAR?.toFixed(2) },
+          { label: 'EUR/ZAR', value: (r.ZAR / r.EUR)?.toFixed(2) },
+          { label: 'GBP/ZAR', value: (r.ZAR / r.GBP)?.toFixed(2) },
+        ],
         date: res.data.date
       })
-    }).catch(() => setRates(null))
+    }).catch(() => {
+      setRates({ pairs: [{ label: 'FX', value: 'Unavailable' }], date: '' })
+    })
   }, [])
 
-  // Ticker scroll animation
+  // Rotate ticker
   useEffect(() => {
-    const interval = setInterval(() => {
-      setTick(t => (t + 1) % 3)
-    }, 3000)
-    return () => clearInterval(interval)
+    const id = setInterval(() => setTick(t => (t + 1) % 3), 3000)
+    return () => clearInterval(id)
   }, [])
+
+  const activePair = rates?.pairs?.[tick % (rates?.pairs?.length || 1)]
 
   return (
     <div className="info-bar">
       <div className="info-bar-inner">
 
-        {/* Weather */}
-        <div className="info-item weather-item">
-          <span className="info-icon">
-            {weather ? weather.icon : '⏳'}
-          </span>
+        <div className="info-item">
+          <span className="info-icon">{weather?.icon || '⏳'}</span>
           <div className="info-text">
             <span className="info-label">Johannesburg</span>
             <span className="info-value">
@@ -102,44 +106,27 @@ export default function InfoBar() {
 
         <div className="info-divider" />
 
-        {/* Exchange rates */}
-        <div className="info-item rates-item">
+        <div className="info-item">
           <span className="info-icon">💱</span>
           <div className="info-text">
             <span className="info-label">
-              FX Rates {rates ? `· ${rates.date}` : ''}
+              FX Rates{rates?.date ? ` · ${rates.date}` : ''}
             </span>
-            <div className="rates-ticker">
-              {rates ? (
-                PAIRS.map((p, i) => (
-                  <span
-                    key={p.label}
-                    className={`rate-pair ${i === tick ? 'rate-active' : ''}`}
-                  >
-                    {p.label} <strong>{rates[p.label]}</strong>
-                  </span>
-                ))
-              ) : (
-                <span className="rate-pair rate-active">Loading rates...</span>
-              )}
-            </div>
+            <span className="info-value">
+              {activePair
+                ? <><strong style={{color:'var(--accent-teal)'}}>{activePair.label}</strong> {activePair.value}</>
+                : 'Loading...'}
+            </span>
           </div>
         </div>
 
         <div className="info-divider" />
 
-        {/* Market time */}
         <div className="info-item">
           <span className="info-icon">🕐</span>
           <div className="info-text">
-            <span className="info-label">JSE</span>
-            <span className="info-value">
-              {new Date().toLocaleTimeString('en-ZA', {
-                hour: '2-digit',
-                minute: '2-digit',
-                timeZone: 'Africa/Johannesburg'
-              })} SAST
-            </span>
+            <span className="info-label">JSE · SAST</span>
+            <span className="info-value">{time || '--:--'}</span>
           </div>
         </div>
 

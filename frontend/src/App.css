@@ -637,3 +637,35 @@ body::before {
   color: var(--accent-teal);
   font-weight: 700;
 }
+
+/* ── LAYOUT FIXES ── */
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.main-layout {
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.send-panel,
+.feed-panel {
+  height: 100%;
+  overflow-y: auto;
+}
+
+.hero-stats {
+  flex-shrink: 0;
+}
+
+/* Fix left edge cutoff */
+.topnav,
+.info-bar,
+.hero-stats,
+.app-main {
+  padding-left: max(1.5rem, env(safe-area-inset-left));
+}

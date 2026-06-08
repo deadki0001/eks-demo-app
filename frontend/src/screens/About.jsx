@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   ArrowLeft, Zap, Shield, Globe, TrendingUp, Users,
-  ChevronLeft, ChevronRight, MessageCircle, X,
-  Facebook, Twitter, Linkedin, Instagram, Youtube
+  ChevronLeft, ChevronRight, MessageCircle, X
 } from 'lucide-react'
 
 const TESTIMONIALS = [
@@ -257,11 +256,11 @@ export default function About() {
               Moving money at the speed of light across South Africa and beyond.
             </p>
             <div className="social-links">
-              <a href="#" className="social-btn"><Facebook size={16} /></a>
-              <a href="#" className="social-btn"><Twitter size={16} /></a>
-              <a href="#" className="social-btn"><Linkedin size={16} /></a>
-              <a href="#" className="social-btn"><Instagram size={16} /></a>
-              <a href="#" className="social-btn"><Youtube size={16} /></a>
+              <a href="#" className="social-btn"><span style={{fontSize:14,fontWeight:800}}>f</span></a>
+              <a href="#" className="social-btn"><span style={{fontSize:14,fontWeight:800}}>𝕏</span></a>
+              <a href="#" className="social-btn"><span style={{fontSize:14,fontWeight:800}}>in</span></a>
+              <a href="#" className="social-btn"><span style={{fontSize:14,fontWeight:800}}>ig</span></a>
+              <a href="#" className="social-btn"><span style={{fontSize:14,fontWeight:800}}>yt</span></a>
             </div>
           </div>
           <div className="footer-links-col">

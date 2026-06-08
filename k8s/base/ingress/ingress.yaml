@@ -7,12 +7,23 @@ metadata:
     kubernetes.io/ingress.class: alb
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
-    alb.ingress.kubernetes.io/healthcheck-path: /health
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
+    alb.ingress.kubernetes.io/ssl-redirect: '443'
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-2:988176743547:certificate/f7e382aa-07ad-4711-8780-2ffcf23ec764
+    alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS13-1-2-2021-06
 spec:
   rules:
-    - http:
+    - host: light-speed-payments.awslearningplatform.click
+      http:
         paths:
           - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: lsd-backend
+                port:
+                  number: 3000
+          - path: /health
             pathType: Prefix
             backend:
               service:
@@ -25,4 +36,4 @@ spec:
               service:
                 name: lsd-frontend
                 port:
-                  number: 8080
+                  number: 80

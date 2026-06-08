@@ -1270,3 +1270,13 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 }
 
 .desktop-home .feed-section .tx-list::-webkit-scrollbar { display: none; }
+
+/* ── DROPDOWN FIX ── */
+select option {
+  background: var(--bg3) !important;
+  color: var(--t1) !important;
+}
+
+select {
+  color-scheme: dark;
+}

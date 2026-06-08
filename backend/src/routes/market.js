@@ -1,17 +1,16 @@
 const express = require('express')
 const router = express.Router()
+const axios = require('axios')
 
-// Proxy FX rates through backend to avoid CORS issues in the browser.
-// Frankfurter API: free, no key, ECB rates daily.
 router.get('/rates', async (req, res) => {
   try {
-    const response = await fetch(
-      'https://api.frankfurter.dev/v2/latest?base=USD&currencies=ZAR,EUR,GBP'
+    const response = await axios.get(
+      'https://api.exchangerate-api.com/v4/latest/USD',
+      { timeout: 8000 }
     )
-    const data = await response.json()
-    const r = data.rates
+    const r = response.data.rates
     res.json({
-      date: data.date,
+      date: response.data.date,
       pairs: [
         { label: 'USD/ZAR', value: r.ZAR?.toFixed(2) },
         { label: 'EUR/ZAR', value: (r.ZAR / r.EUR)?.toFixed(2) },
@@ -19,6 +18,7 @@ router.get('/rates', async (req, res) => {
       ]
     })
   } catch (err) {
+    console.error('FX rates error:', err.message)
     res.status(503).json({ error: 'FX rates unavailable' })
   }
 })

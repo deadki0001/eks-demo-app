@@ -1,96 +1,59 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
-import SendForm from './components/SendForm'
-import TxFeed from './components/TxFeed'
-import InfoBar from './components/InfoBar'
+import Home from './screens/Home'
+import SendSheet from './components/SendSheet'
 import './App.css'
 
 const API_URL = import.meta.env.VITE_API_URL || '/api'
 
-function App() {
+export default function App() {
   const [payments, setPayments] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const [loading, setLoading]   = useState(true)
+  const [sheet, setSheet]       = useState(false)
+  const [weather, setWeather]   = useState(null)
+  const [rates, setRates]       = useState(null)
 
-  const fetchPayments = async () => {
-    try {
-      setLoading(true)
-      const res = await axios.get(`${API_URL}/payments`)
-      setPayments(res.data)
-      setError(null)
-    } catch {
-      setError('Could not load transactions.')
-    } finally {
-      setLoading(false)
-    }
+  useEffect(() => {
+    axios.get(`${API_URL}/payments`)
+      .then(r => setPayments(r.data))
+      .finally(() => setLoading(false))
+
+    axios.get('https://api.open-meteo.com/v1/forecast', {
+      params: {
+        latitude: -26.2041, longitude: 28.0473,
+        current_weather: true, timezone: 'Africa/Johannesburg', forecast_days: 1
+      }
+    }).then(r => {
+      const cw = r.data.current_weather
+      const icons = {0:'Sun',1:'CloudSun',2:'Cloud',3:'Cloud',45:'CloudFog',61:'CloudRain',80:'CloudDrizzle',95:'CloudLightning'}
+      setWeather({ temp: Math.round(cw.temperature), wind: Math.round(cw.windspeed), code: cw.weathercode, iconName: icons[cw.weathercode] || 'Thermometer' })
+    }).catch(() => setWeather({ temp: '--', wind: '--', iconName: 'Thermometer' }))
+
+    axios.get(`${API_URL}/market/rates`)
+      .then(r => setRates(r.data))
+      .catch(() => setRates(null))
+  }, [])
+
+  const onSent = (p) => {
+    setPayments(prev => [p, ...prev])
+    setSheet(false)
   }
-
-  useEffect(() => { fetchPayments() }, [])
-
-  const onSent = (p) => setPayments([p, ...payments])
-
-  const totalVolume = payments
-    .reduce((s, p) => s + parseFloat(p.amount || 0), 0)
-
-  const todayCount = payments.filter(p => {
-    const d = new Date(p.created_at)
-    const now = new Date()
-    return d.toDateString() === now.toDateString()
-  }).length
 
   return (
     <div className="app">
-      <nav className="topnav">
-        <div className="nav-brand">
-          <div className="brand-mark">L⚡</div>
-          <div>
-            <div className="brand-name">LSD Payments</div>
-            <div className="brand-tag">Light Speed Division</div>
-          </div>
-        </div>
-        <div className="nav-status">
-          <div className="status-pulse"></div>
-          All systems go
-        </div>
-      </nav>
-
-      <InfoBar />
-
-      <div className="hero-stats">
-        <div className="stat-card">
-          <div className="stat-card-label">Total Sent</div>
-          <div className="stat-card-value teal">{payments.length}</div>
-          <div className="stat-card-sub">transactions</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-card-label">Volume</div>
-          <div className="stat-card-value purple">
-            {totalVolume.toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-          </div>
-          <div className="stat-card-sub">across all currencies</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-card-label">Today</div>
-          <div className="stat-card-value gold">{todayCount}</div>
-          <div className="stat-card-sub">transactions</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-card-label">Speed</div>
-          <div className="stat-card-value teal">{'<'}1ms</div>
-          <div className="stat-card-sub">avg latency</div>
-        </div>
-      </div>
-
-      <div className="main-layout">
-        <div className="send-panel">
-          <SendForm apiUrl={API_URL} onSent={onSent} />
-        </div>
-        <div className="feed-panel">
-          <TxFeed payments={payments} loading={loading} error={error} />
-        </div>
-      </div>
+      <Home
+        payments={payments}
+        loading={loading}
+        weather={weather}
+        rates={rates}
+        onSend={() => setSheet(true)}
+      />
+      <SendSheet
+        open={sheet}
+        onClose={() => setSheet(false)}
+        apiUrl={API_URL}
+        onSent={onSent}
+      />
     </div>
   )
 }
-
-export default App

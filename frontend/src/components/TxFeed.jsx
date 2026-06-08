@@ -1,112 +1,81 @@
-const AVATAR_COLORS = [
-  ['#7c5cfc','#5b3fd4'],
-  ['#00c9a7','#00957d'],
-  ['#fc5c7d','#d43f5f'],
-  ['#f0b429','#c8941a'],
-  ['#3b82f6','#2563eb'],
-  ['#8b5cf6','#7c3aed'],
+import { ArrowUpRight } from 'lucide-react'
+
+const COLORS = [
+  ['#7c5cfc','#5b3fd4'],['#00c9a7','#00957d'],['#fc5c7d','#d43f5f'],
+  ['#f0b429','#c8941a'],['#3b82f6','#2563eb'],['#8b5cf6','#7c3aed'],
 ]
 
-function initials(name) {
-  if (!name) return '??'
-  const parts = name.trim().split(' ')
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+const SYM = { ZAR:'R', USD:'$', EUR:'€', GBP:'£' }
+
+function initials(n) {
+  if (!n) return '??'
+  const p = n.trim().split(' ')
+  return p.length === 1 ? p[0].slice(0,2).toUpperCase() : (p[0][0]+p[p.length-1][0]).toUpperCase()
 }
 
-function avatarColor(name) {
-  if (!name) return AVATAR_COLORS[0]
-  return AVATAR_COLORS[name.charCodeAt(0) % AVATAR_COLORS.length]
+function avatarBg(n) {
+  const [c1,c2] = COLORS[(n||'').charCodeAt(0) % COLORS.length]
+  return `linear-gradient(135deg,${c1},${c2})`
 }
 
-function formatAmount(amount, currency) {
-  const num = parseFloat(amount)
-  const prefix = { ZAR: 'R', USD: '$', EUR: '€', GBP: '£' }[currency] || currency + ' '
-  return `${prefix}${num.toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+function fmtAmt(amount, currency) {
+  const s = SYM[currency] || currency+' '
+  return s + parseFloat(amount).toLocaleString('en-ZA', { minimumFractionDigits:2, maximumFractionDigits:2 })
 }
 
-function formatDate(ts) {
-  const d = new Date(ts)
-  const now = new Date()
-  if (d.toDateString() === now.toDateString()) return 'Today'
-  const yesterday = new Date(now)
-  yesterday.setDate(now.getDate() - 1)
-  if (d.toDateString() === yesterday.toDateString()) return 'Yesterday'
-  return d.toLocaleDateString('en-ZA', { day: 'numeric', month: 'short' })
+function fmtTime(ts) {
+  return new Date(ts).toLocaleTimeString('en-ZA', { hour:'2-digit', minute:'2-digit' })
 }
 
-const BADGE = {
+const STATUS = {
   pending:   ['badge-pending',   'Pending'],
-  completed: ['badge-completed', 'Completed'],
+  completed: ['badge-completed', 'Sent'],
   failed:    ['badge-failed',    'Failed'],
 }
 
-export default function TxFeed({ payments, loading, error }) {
+export default function TxFeed({ payments, loading }) {
   if (loading) {
     return (
       <div className="feed-loading">
-        <div className="spinner"></div>
-        Loading transactions...
+        <div className="spinner" />
+        <span>Loading transactions...</span>
       </div>
     )
   }
-
-  if (error) return <div className="feed-error">{error}</div>
 
   if (payments.length === 0) {
     return (
       <div className="feed-empty">
-        <div className="feed-empty-icon">💸</div>
-        <h3>No transactions yet</h3>
-        <p>Send your first payment to get started.</p>
+        <ArrowUpRight size={32} className="feed-empty-icon" />
+        <p>No transactions yet</p>
+        <span>Tap Send to make your first payment</span>
       </div>
     )
   }
 
-  const groups = {}
-  payments.forEach(p => {
-    const key = formatDate(p.created_at)
-    if (!groups[key]) groups[key] = []
-    groups[key].push(p)
-  })
-
   return (
-    <>
-      <div className="feed-heading">
-        Transaction History
-        <span className="feed-count">{payments.length} total</span>
-      </div>
-      <div className="tx-list">
-        {Object.entries(groups).map(([date, items]) => (
-          <div key={date}>
-            <div className="tx-date-divider">{date}</div>
-            {items.map(p => {
-              const [c1, c2] = avatarColor(p.recipient)
-              const [badgeClass, badgeLabel] = BADGE[p.status] || ['badge-pending', p.status]
-              return (
-                <div key={p.id} className="tx-item">
-                  <div
-                    className="tx-avatar"
-                    style={{ background: `linear-gradient(135deg, ${c1}, ${c2})` }}
-                  >
-                    {initials(p.recipient)}
-                  </div>
-                  <div className="tx-body">
-                    <div className="tx-title">{p.recipient}</div>
-                    <div className="tx-subtitle">
-                      From {p.sender}{p.description ? ` · ${p.description}` : ''}
-                    </div>
-                  </div>
-                  <div className="tx-right">
-                    <div className="tx-amount">{formatAmount(p.amount, p.currency)}</div>
-                    <div className={`tx-badge ${badgeClass}`}>{badgeLabel}</div>
-                  </div>
-                </div>
-              )
-            })}
+    <div className="tx-list">
+      {payments.map(p => {
+        const [cls, lbl] = STATUS[p.status] || STATUS.pending
+        return (
+          <div key={p.id} className="tx-row">
+            <div className="tx-av" style={{ background: avatarBg(p.recipient) }}>
+              {initials(p.recipient)}
+            </div>
+            <div className="tx-body">
+              <div className="tx-name">{p.recipient}</div>
+              <div className="tx-sub">
+                {p.sender}{p.description ? ` · ${p.description}` : ''}
+                <span className="tx-time"> · {fmtTime(p.created_at)}</span>
+              </div>
+            </div>
+            <div className="tx-right">
+              <div className="tx-amt">{fmtAmt(p.amount, p.currency)}</div>
+              <span className={`tx-badge ${cls}`}>{lbl}</span>
+            </div>
           </div>
-        ))}
-      </div>
-    </>
+        )
+      })}
+    </div>
   )
 }

@@ -9,6 +9,7 @@ import InstantMoney from './screens/InstantMoney'
 import About from './screens/About'
 import SendSheet from './components/SendSheet'
 import NavBar from './components/NavBar'
+import { Monitor, Smartphone } from 'lucide-react'
 import './App.css'
 
 const API_URL = import.meta.env.VITE_API_URL || '/api'
@@ -18,6 +19,9 @@ export default function App() {
   const [sheet, setSheet]         = useState(false)
   const [weather, setWeather]     = useState(null)
   const [rates, setRates]         = useState(null)
+  const [desktop, setDesktop]     = useState(
+    () => localStorage.getItem('lsd-view') === 'desktop'
+  )
   const location = useLocation()
   const isAbout  = location.pathname === '/about'
 
@@ -37,25 +41,34 @@ export default function App() {
 
   const onSent = (p) => { add(p); setSheet(false) }
 
+  const toggleView = () => {
+    const next = !desktop
+    setDesktop(next)
+    localStorage.setItem('lsd-view', next ? 'desktop' : 'mobile')
+  }
+
   return (
-    <div className="app">
+    <div className={`app ${desktop ? 'view-desktop' : ''}`}>
       {!isAbout && (
         <NavBar
           weather={weather}
           rates={rates}
           onSend={() => setSheet(true)}
+          desktop={desktop}
         />
       )}
 
-      <Routes>
-        <Route path="/" element={
-          <Home payments={payments} loading={loading} onSend={() => setSheet(true)} />
-        } />
-        <Route path="/analytics" element={<Analytics payments={payments} />} />
-        <Route path="/beneficiaries" element={<Beneficiaries apiUrl={API_URL} onSend={() => setSheet(true)} />} />
-        <Route path="/instant-money" element={<InstantMoney apiUrl={API_URL} />} />
-        <Route path="/about" element={<About />} />
-      </Routes>
+      <div className={desktop && !isAbout ? 'desktop-content' : 'mobile-content'}>
+        <Routes>
+          <Route path="/" element={
+            <Home payments={payments} loading={loading} onSend={() => setSheet(true)} desktop={desktop} />
+          } />
+          <Route path="/analytics" element={<Analytics payments={payments} />} />
+          <Route path="/beneficiaries" element={<Beneficiaries apiUrl={API_URL} onSend={() => setSheet(true)} />} />
+          <Route path="/instant-money" element={<InstantMoney apiUrl={API_URL} />} />
+          <Route path="/about" element={<About />} />
+        </Routes>
+      </div>
 
       {!isAbout && (
         <SendSheet
@@ -64,6 +77,13 @@ export default function App() {
           apiUrl={API_URL}
           onSent={onSent}
         />
+      )}
+
+      {!isAbout && (
+        <button className="view-toggle" onClick={toggleView}>
+          {desktop ? <Smartphone size={13} /> : <Monitor size={13} />}
+          {desktop ? 'Mobile' : 'Desktop'}
+        </button>
       )}
     </div>
   )

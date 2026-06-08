@@ -1140,3 +1140,133 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 .footer-brand { font-size: 16px; font-weight: 700; }
 .footer-tag { font-size: 11px; color: #9090b0; }
 .footer-copy { font-size: 12px; color: #44445a; line-height: 1.8; }
+
+/* ── VIEW TOGGLE ── */
+.view-toggle {
+  position: fixed;
+  bottom: 76px;
+  right: 16px;
+  z-index: 200;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: 100px;
+  padding: 7px 14px;
+  font-size: 11px; font-weight: 600;
+  color: var(--t2);
+  display: flex; align-items: center; gap: 5px;
+  transition: all 0.15s;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+}
+
+.view-toggle:hover { background: var(--bg4); color: var(--t1); }
+
+/* ── DESKTOP LAYOUT ── */
+.view-desktop {
+  max-width: 100% !important;
+}
+
+.view-desktop .app {
+  max-width: 100%;
+}
+
+.view-desktop .bottom-nav {
+  display: none;
+}
+
+.view-desktop .topbar {
+  padding: 14px 32px;
+}
+
+.view-desktop .infobar {
+  margin: 0 32px 0;
+  border-radius: 0 0 14px 14px;
+  border-top: none;
+}
+
+.desktop-content {
+  display: grid;
+  grid-template-columns: 400px 1fr;
+  height: calc(100vh - 120px);
+  overflow: hidden;
+  padding: 20px 32px;
+  gap: 20px;
+}
+
+.desktop-content .screen {
+  padding-bottom: 0;
+  overflow-y: auto;
+  border-right: none;
+}
+
+.desktop-content .screen::-webkit-scrollbar { display: none; }
+
+.desktop-content .balance-card {
+  margin: 0 0 16px 0;
+}
+
+.desktop-content .feed-section {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.desktop-content .feed-section .tx-list {
+  overflow-y: auto;
+  flex: 1;
+}
+
+.desktop-content .feed-section .tx-list::-webkit-scrollbar { display: none; }
+
+.view-toggle.desktop-toggle {
+  bottom: 20px;
+}
+
+.view-desktop .view-toggle {
+  bottom: 20px;
+}
+
+.mobile-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+.mobile-content .screen {
+  flex: 1;
+}
+
+/* ── DESKTOP HOME ── */
+.desktop-home {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.desktop-home .balance-card {
+  margin: 0 0 16px 0;
+  flex-shrink: 0;
+}
+
+.desktop-home .feed-section {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 16px;
+}
+
+.desktop-home .feed-section .tx-list {
+  overflow-y: auto;
+  flex: 1;
+}
+
+.desktop-home .feed-section .tx-list::-webkit-scrollbar { display: none; }

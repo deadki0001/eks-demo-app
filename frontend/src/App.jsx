@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
-import axios from 'axios'
 import usePayments from './hooks/usePayments'
 import Home from './screens/Home'
 import Analytics from './screens/Analytics'
@@ -18,43 +17,12 @@ const API_URL = import.meta.env.VITE_API_URL || '/api'
 
 export default function App() {
   const { payments, loading, add } = usePayments(API_URL)
-  const [sheet, setSheet]   = useState(false)
-  const [weather, setWeather] = useState(null)
-  const [rates, setRates]   = useState(null)
-  const [desktop, setDesktop] = useState(
+  const [sheet, setSheet]         = useState(false)
+  const [desktop, setDesktop]     = useState(
     () => localStorage.getItem('lsd-view') === 'desktop'
   )
   const location = useLocation()
   const isAbout  = location.pathname === '/about'
-
-  useEffect(() => {
-    fetch('https://api.open-meteo.com/v1/forecast?latitude=-26.2041&longitude=28.0473&current_weather=true&timezone=Africa%2FJohannesburg&forecast_days=1')
-      .then(r => r.json())
-      .then(data => {
-        const cw = data.current_weather
-        if (!cw) return
-        const iconMap = {
-          0:'Sun', 1:'CloudSun', 2:'CloudSun', 3:'Cloud',
-          45:'CloudFog', 48:'CloudFog',
-          51:'CloudDrizzle', 53:'CloudDrizzle', 55:'CloudDrizzle',
-          61:'CloudRain', 63:'CloudRain', 65:'CloudRain',
-          71:'CloudSnow', 73:'CloudSnow', 75:'CloudSnow',
-          80:'CloudRain', 81:'CloudRain', 82:'CloudRain',
-          95:'CloudLightning', 99:'CloudLightning'
-        }
-        setWeather({
-          temp: Math.round(cw.temperature),
-          wind: Math.round(cw.windspeed),
-          iconName: iconMap[cw.weathercode] || 'Thermometer',
-          isDay: cw.is_day === 1
-        })
-      })
-      .catch(() => setWeather({ temp: '--', wind: '--', iconName: 'Thermometer', isDay: true }))
-
-    axios.get(`${API_URL}/market/rates`)
-      .then(r => setRates(r.data))
-      .catch(() => setRates(null))
-  }, [])
 
   const onSent = (p) => { add(p); setSheet(false) }
 
@@ -84,8 +52,6 @@ export default function App() {
 
       {!isAbout && (
         <NavBar
-          weather={weather}
-          rates={rates}
           onSend={() => setSheet(true)}
           desktop={desktop}
         />

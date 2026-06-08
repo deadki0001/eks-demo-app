@@ -1,16 +1,9 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import { Home, BarChart2, Send, Users, Zap, Info } from 'lucide-react'
 import InfoBar from './InfoBar'
-import {
-  Sun, Cloud, CloudRain, CloudLightning,
-  CloudDrizzle, CloudFog, CloudSun, Thermometer
-} from 'lucide-react'
 
-const WEATHER_ICONS = { Sun, Cloud, CloudRain, CloudLightning, CloudDrizzle, CloudFog, CloudSun, Thermometer }
-
-export default function NavBar({ weather, rates, onSend, desktop }) {
+export default function NavBar({ onSend, desktop }) {
   const navigate = useNavigate()
-  const WeatherIcon = weather ? (WEATHER_ICONS[weather.iconName] || Thermometer) : Thermometer
 
   return (
     <>
@@ -32,13 +25,12 @@ export default function NavBar({ weather, rates, onSend, desktop }) {
             </nav>
           )}
           <button className="about-btn" onClick={() => navigate('/about')}>
-            <Info size={14} />
-            About us
+            <Info size={14} /> About us
           </button>
         </div>
       </header>
 
-      <InfoBar weather={weather} rates={rates} WeatherIcon={WeatherIcon} />
+      <InfoBar />
 
       {!desktop && (
         <nav className="bottom-nav">

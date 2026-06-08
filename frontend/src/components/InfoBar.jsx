@@ -1,88 +1,101 @@
-import { useState, useEffect } from 'react'
-import { Wind, Clock, Sun, Cloud, CloudRain, CloudLightning, CloudDrizzle, CloudFog, CloudSun, Thermometer } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
 
-const WEATHER_ICONS = { Sun, Cloud, CloudRain, CloudLightning, CloudDrizzle, CloudFog, CloudSun, Thermometer }
+const CLOCKS = [
+  { city: 'JHB',    tz: 'Africa/Johannesburg',   flag: '🇿🇦' },
+  { city: 'London', tz: 'Europe/London',          flag: '🇬🇧' },
+  { city: 'NY',     tz: 'America/New_York',       flag: '🇺🇸' },
+  { city: 'Tokyo',  tz: 'Asia/Tokyo',             flag: '🇯🇵' },
+  { city: 'Sydney', tz: 'Australia/Sydney',       flag: '🇦🇺' },
+]
 
-const CURRENCY_BADGE = {
-  'USD/ZAR': { code: 'USD', bg: '#1a3a6e', color: '#60a5fa', country: 'US' },
-  'EUR/ZAR': { code: 'EUR', bg: '#1a3a2e', color: '#34d399', country: 'EU' },
-  'GBP/ZAR': { code: 'GBP', bg: '#3a1a2e', color: '#f472b6', country: 'GB' },
+const CURRENCY_LABELS = [
+  { label: 'USD/ZAR', from: 'USD', to: 'ZAR', base: 'USD' },
+  { label: 'EUR/ZAR', from: 'EUR', to: 'ZAR', base: 'EUR' },
+  { label: 'GBP/ZAR', from: 'GBP', to: 'ZAR', base: 'GBP' },
+  { label: 'EUR/USD', from: 'EUR', to: 'USD', base: 'EUR' },
+  { label: 'GBP/USD', from: 'GBP', to: 'USD', base: 'GBP' },
+  { label: 'JPY/USD', from: 'JPY', to: 'USD', base: 'USD' },
+  { label: 'AUD/USD', from: 'AUD', to: 'USD', base: 'AUD' },
+]
+
+function getTime(tz) {
+  return new Date().toLocaleTimeString('en-US', {
+    hour: '2-digit', minute: '2-digit',
+    timeZone: tz, hour12: false
+  })
 }
 
-export default function InfoBar({ weather, rates }) {
-  const [time, setTime] = useState('')
-  const [tick, setTick] = useState(0)
-
-  const WeatherIcon = weather
-    ? (WEATHER_ICONS[weather.iconName] || Thermometer)
-    : Thermometer
+export default function InfoBar() {
+  const [rates, setRates]   = useState({})
+  const [times, setTimes]   = useState({})
+  const [date, setDate]     = useState('')
+  const tickerRef           = useRef(null)
 
   useEffect(() => {
-    const upd = () => setTime(
-      new Date().toLocaleTimeString('en-ZA', {
-        hour: '2-digit', minute: '2-digit',
+    const updateTimes = () => {
+      const t = {}
+      CLOCKS.forEach(c => { t[c.city] = getTime(c.tz) })
+      setTimes(t)
+      setDate(new Date().toLocaleDateString('en-ZA', {
+        day: 'numeric', month: 'short', year: 'numeric',
         timeZone: 'Africa/Johannesburg'
-      })
-    )
-    upd()
-    const id = setInterval(upd, 1000)
+      }))
+    }
+    updateTimes()
+    const id = setInterval(updateTimes, 1000)
     return () => clearInterval(id)
   }, [])
 
   useEffect(() => {
-    if (!rates?.pairs?.length) return
-    const id = setInterval(() => setTick(t => (t + 1) % rates.pairs.length), 3000)
-    return () => clearInterval(id)
-  }, [rates])
+    fetch('https://api.exchangerate-api.com/v4/latest/USD')
+      .then(r => r.json())
+      .then(data => {
+        const r = data.rates
+        setRates({
+          'USD/ZAR': r.ZAR?.toFixed(2),
+          'EUR/ZAR': (r.ZAR / r.EUR)?.toFixed(2),
+          'GBP/ZAR': (r.ZAR / r.GBP)?.toFixed(2),
+          'EUR/USD': (1 / r.EUR)?.toFixed(4),
+          'GBP/USD': (1 / r.GBP)?.toFixed(4),
+          'JPY/USD': (1 / r.JPY)?.toFixed(6),
+          'AUD/USD': (1 / r.AUD)?.toFixed(4),
+        })
+      })
+      .catch(() => {})
+  }, [])
 
-  const pair = rates?.pairs?.[tick]
-  const badge = pair ? CURRENCY_BADGE[pair.label] : null
+  const currencyItems = CURRENCY_LABELS.map(c => ({
+    label: c.label,
+    value: rates[c.label] || '--'
+  }))
+
+  const tickerItems = [...currencyItems, ...currencyItems]
 
   return (
-    <div className="infobar">
-      <div className="ib-seg">
-        <div className="ib-ico">
-          <WeatherIcon size={15} />
-        </div>
-        <div>
-          <div className="ib-label">Johannesburg</div>
-          <div className="ib-value">
-            {weather && weather.temp !== '--'
-              ? <>{weather.temp}&deg;C <span className="ib-muted">
-                  <Wind size={10} style={{verticalAlign:'middle'}} /> {weather.wind} km/h
-                </span></>
-              : weather === null ? 'Loading...' : '--&deg;C'}
+    <div className="infobar-wrap">
+      <div className="ticker-bar">
+        <div className="ticker-track" ref={tickerRef}>
+          <div className="ticker-inner">
+            {tickerItems.map((item, i) => (
+              <div key={i} className="ticker-item">
+                <span className="ticker-label">{item.label}</span>
+                <span className="ticker-value">{item.value}</span>
+                <span className="ticker-sep">|</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
 
-      <div className="ib-divider" />
-
-      <div className="ib-seg">
-        {badge && (
-          <div className="currency-badge" style={{background: badge.bg, color: badge.color}}>
-            {badge.code}
+      <div className="clocks-bar">
+        <span className="clocks-date">{date}</span>
+        <div className="clocks-divider" />
+        {CLOCKS.map(c => (
+          <div key={c.city} className="clock-item">
+            <span className="clock-city">{c.city}</span>
+            <span className="clock-time">{times[c.city] || '--:--'}</span>
           </div>
-        )}
-        <div>
-          <div className="ib-label">
-            {pair ? pair.label : 'FX Rates'}
-            {rates?.date ? <span className="ib-date"> - {rates.date}</span> : ''}
-          </div>
-          <div className="ib-value ib-teal">
-            {pair ? pair.value : (rates === null ? 'Loading...' : 'Unavailable')}
-          </div>
-        </div>
-      </div>
-
-      <div className="ib-divider" />
-
-      <div className="ib-seg">
-        <div className="ib-ico"><Clock size={15} /></div>
-        <div>
-          <div className="ib-label">JSE - SAST</div>
-          <div className="ib-value">{time || '--:--'}</div>
-        </div>
+        ))}
       </div>
     </div>
   )

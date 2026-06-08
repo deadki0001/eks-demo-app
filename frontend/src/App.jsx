@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import axios from 'axios'
 import Home from './screens/Home'
 import SendSheet from './components/SendSheet'
+import { Monitor, Smartphone } from 'lucide-react'
 import './App.css'
 
 const API_URL = import.meta.env.VITE_API_URL || '/api'
@@ -12,6 +13,9 @@ export default function App() {
   const [sheet, setSheet]       = useState(false)
   const [weather, setWeather]   = useState(null)
   const [rates, setRates]       = useState(null)
+  const [desktop, setDesktop]   = useState(
+    () => localStorage.getItem('lsd-view') === 'desktop'
+  )
 
   useEffect(() => {
     axios.get(`${API_URL}/payments`)
@@ -39,14 +43,21 @@ export default function App() {
     setSheet(false)
   }
 
+  const toggleView = () => {
+    const next = !desktop
+    setDesktop(next)
+    localStorage.setItem('lsd-view', next ? 'desktop' : 'mobile')
+  }
+
   return (
-    <div className="app">
+    <div className={`app ${desktop ? 'view-desktop' : ''}`}>
       <Home
         payments={payments}
         loading={loading}
         weather={weather}
         rates={rates}
         onSend={() => setSheet(true)}
+        desktop={desktop}
       />
       <SendSheet
         open={sheet}
@@ -54,6 +65,10 @@ export default function App() {
         apiUrl={API_URL}
         onSent={onSent}
       />
+      <button className="view-toggle" onClick={toggleView}>
+        {desktop ? <Smartphone size={13} /> : <Monitor size={13} />}
+        {desktop ? 'Mobile' : 'Desktop'}
+      </button>
     </div>
   )
 }

@@ -1,0 +1,14 @@
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: lsd-backend-policy
+  namespace: lsd-payments
+spec:
+  selector:
+    matchLabels:
+      app: lsd-backend
+  rules:
+  - from:
+    - source:
+        principals:
+        - cluster.local/ns/lsd-payments/sa/default

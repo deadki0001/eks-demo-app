@@ -1,4 +1,4 @@
-apiVersion: dynatrace.com/v1beta4
+apiVersion: dynatrace.com/v1beta6
 kind: DynaKube
 metadata:
   name: lsd-payments
